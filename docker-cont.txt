@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mediawiki
+      MYSQL_USER: wiki
+      MYSQL_PASSWORD: WikiP@ssw0rd
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - wiki_network
+
+  wiki:
+    image: mediawiki
+    container_name: wiki
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ~/LocalSettings.php:/var/www/html/LocalSettings.php
+    environment:
+      MEDIAWIKI_DB_HOST: mariadb
+      MEDIAWIKI_DB_USER: wiki
+      MEDIAWIKI_DB_PASSWORD: WikiP@ssw0rd
+      MEDIAWIKI_DB_NAME: mediawiki
+    depends_on:
+      - mariadb
+    networks:
+      - wiki_network
+
+networks:
+  wiki_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
